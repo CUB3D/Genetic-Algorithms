@@ -23,13 +23,18 @@ public class Genetics
     {
         int i = 0;
 
-        while(i < 200000000)
+        while(true)
         {
             loop();
+
+            if(getFittestIndividuals()[0].getFitness() == 10 && getFittestIndividuals()[1].getFitness() == 10)
+            {
+                System.out.println("Solution found, Generations: " + i);
+                break;
+            }
+
             i++;
         }
-
-        System.out.println("Best after iteration: ");
         printIndividual(population[getFittestIndividualPosition()]);
     }
 
@@ -37,20 +42,13 @@ public class Genetics
     {
         generateRandomPopulation();
 
-        printPopulation();
-
         Individual[] best = getFittestIndividuals();
-
-        System.out.println("Best 2:");
-
-        for(int i = 0; i < best.length; i++)
-        {
-            printIndividual(best[i]);
-        }
 
         produceOffspring(best);
         
         mutate();
+
+        printIndividual(population[getFittestIndividualPosition()]);
     }
 
     private static void mutate()
@@ -68,7 +66,7 @@ public class Genetics
 
     private static void produceOffspring(Individual[] parents)
     {
-        int breakpoint = 5;//random.nextInt(GENOME_LENGTH);
+        int breakpoint = 1;//random.nextInt(GENOME_LENGTH);
 
         //TODO: randomize offspring amount
         int[] genome1 = crossover(breakpoint, parents[0].genome, parents[1].genome);
@@ -125,7 +123,7 @@ public class Genetics
 
     private static void printIndividual(Individual i)
     {
-        System.out.println("Position: " + i + ", Gnome: " + Arrays.toString(i.genome) + ", Fitness: " + i.getFitness());
+        System.out.println("Gnome: " + Arrays.toString(i.genome) + ", Fitness: " + i.getFitness());
     }
 
     private static void generateRandomPopulation()
