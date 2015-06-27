@@ -14,11 +14,11 @@ public class Individual
 
     public double getFitness()
     {
-        double fitness = 10;
+        double fitness = 0;
 
         for(int i = 0; i < genome.length; i++)
         {
-            fitness -= genome[i];
+            fitness += genome[i];
         }
 
         return fitness;

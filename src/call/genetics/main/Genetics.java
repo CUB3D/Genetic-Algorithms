@@ -1,6 +1,8 @@
 package call.genetics.main;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -8,11 +10,12 @@ import java.util.Random;
  */
 public class Genetics
 {
-    public static final int GENOME_LENGTH = 10;
+    public static final int GENOME_LENGTH = 1000;
+    private static final int BASE_POPULATION_SIZE = 20;
 
     public static Random random = new Random();
 
-    public static Individual[] population = new Individual[10];
+    public static List<Individual> population = new ArrayList<Individual>();
 
     public static void main(String[] args)
     {
@@ -22,6 +25,8 @@ public class Genetics
     private static void start()
     {
         int i = 0;
+
+        generateRandomPopulation();
 
         while(true)
         {
@@ -35,27 +40,26 @@ public class Genetics
 
             i++;
         }
-        printIndividual(population[getFittestIndividualPosition()]);
+
+        printIndividual(getFittestIndividual());
     }
 
     public static void loop()
     {
-        generateRandomPopulation();
-
         Individual[] best = getFittestIndividuals();
 
         produceOffspring(best);
         
         mutate();
 
-        printIndividual(population[getFittestIndividualPosition()]);
+        //printIndividual(getFittestIndividual());
     }
 
     private static void mutate()
     {
-        for(int i = 0; i < population.length; i++)
+        for(int i = 0; i < population.size(); i++)
         {
-            Individual individual = population[i];
+            Individual individual = population.get(i);
 
             int pos = random.nextInt(GENOME_LENGTH);
             int value = random.nextInt(2);
@@ -66,7 +70,7 @@ public class Genetics
 
     private static void produceOffspring(Individual[] parents)
     {
-        int breakpoint = 1;//random.nextInt(GENOME_LENGTH);
+        int breakpoint = random.nextInt(GENOME_LENGTH);
 
         //TODO: randomize offspring amount
         int[] genome1 = crossover(breakpoint, parents[0].genome, parents[1].genome);
@@ -75,21 +79,9 @@ public class Genetics
         Individual child1 = new Individual(genome1);
         Individual child2 = new Individual(genome2);
 
-        for(int i = 0; i < population.length; i++)
-        {
-            if(population[i] == null)
-            {
-                population[i] = child1;
-            }
-        }
+        population.add(child1);
 
-        for(int i = 0; i < population.length; i++)
-        {
-            if(population[i] == null)
-            {
-                population[i] = child2;
-            }
-        }
+        population.add(child2);
     }
 
     public static int[] crossover(int breakpoint, int[] genome1, int[] genome2)
@@ -113,9 +105,9 @@ public class Genetics
 
     private static void printPopulation()
     {
-        for(int i = 0; i < population.length; i++)
+        for(int i = 0; i < population.size(); i++)
         {
-            Individual individual = population[i];
+            Individual individual = population.get(i);
 
             printIndividual(individual);
         }
@@ -128,10 +120,12 @@ public class Genetics
 
     private static void generateRandomPopulation()
     {
-        for(int i = 0; i < population.length; i++)
+        for(int i = 0; i < BASE_POPULATION_SIZE; i++)
         {
-           population[i] = new Individual(generateRandomGnome());
+           population.add(new Individual(generateRandomGnome()));
         }
+
+        System.out.println("Generated random population with " + population.size() + " individuals");
     }
 
     private static int[] generateRandomGnome()
@@ -150,36 +144,38 @@ public class Genetics
     {
         Individual[] best2Individuals = new Individual[2];
 
-        int individual1 = getFittestIndividualPosition();
+        best2Individuals[0] = getFittestIndividual();
 
-        best2Individuals[0] = population[individual1];
+        int index = population.indexOf(best2Individuals[0]);
 
-        population[individual1] = null;
+        population.set(index, null);
 
-        best2Individuals[1] = population[getFittestIndividualPosition()];
+        best2Individuals[1] = getFittestIndividual();
+
+        population.set(index, best2Individuals[0]);
 
         return best2Individuals;
     }
 
-    public static int getFittestIndividualPosition()
+    public static Individual getFittestIndividual()
     {
         double maxFitness = 0.0;
-        int pos = 0;
+        Individual fittest = null;
 
-        for(int i = 0; i < population.length; i++)
+        for(int i = 0; i < population.size(); i++)
         {
-            Individual individual = population[i];
+            Individual individual = population.get(i);
 
             if(individual != null)
             {
                 if(individual.getFitness() > maxFitness)
                 {
                     maxFitness = individual.getFitness();
-                    pos = i;
+                    fittest = individual;
                 }
             }
         }
 
-        return pos;
+        return fittest;
     }
 }
